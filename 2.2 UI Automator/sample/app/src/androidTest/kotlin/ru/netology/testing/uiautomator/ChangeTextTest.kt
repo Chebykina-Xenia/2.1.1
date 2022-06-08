@@ -46,7 +46,7 @@ class ChangeTextTest {
 //        ).click()
 //    }
 
-//    @Test
+    //    @Test
 //    fun testChangeText() {
 //        // Press home
 //        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -70,7 +70,7 @@ class ChangeTextTest {
 //        val result = device.findObject(By.res(packageName, "textToBeChanged")).text
 //        assertEquals(result, textToSet)
 //    }
-
+    //функция для запуска приложения
     private fun waitForPackage(packageName: String) {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = context.packageManager.getLaunchIntentForPackage(packageName)
@@ -80,7 +80,7 @@ class ChangeTextTest {
 
     @Before
     fun beforeEachTest() {
-        // Press home
+        // Press home — нажимаем на кнопку домой, на случай если у нас открыто какое-то приложение
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         device.pressHome()
 
@@ -98,17 +98,59 @@ class ChangeTextTest {
         ).click()
     }
 
+    //проверка изменения текста
     @Test
     fun testChangeText() {
+        //запускаем приложение
+        val packageName = MODEL_PACKAGE
+        waitForPackage(packageName)
+        //вводим текст в поле
+        device.findObject(By.res(packageName, "userInput")).text = textToSet
+        //кликаем по кнопке
+        device.findObject(By.res(packageName, "buttonChange")).click()
+
+        //выводим фактический результат
+        val result = device.findObject(By.res(packageName, "textToBeChanged")).text
+        //проверяем фактический и ожидаемый результат
+        assertEquals(result, textToSet)
+    }
+
+    //Тест на попытку установки пустой строки
+    @Test
+    fun testEmptyLine() {
+
         val packageName = MODEL_PACKAGE
         waitForPackage(packageName)
 
-        device.findObject(By.res(packageName, "userInput")).text = textToSet
+        //получаем значение из верхней строки
+        val expectedText = device.findObject(By.res(packageName, "textToBeChanged")).text
+        //вводим пустую строку
+        device.findObject(By.res(packageName, "userInput")).text = " "
+        //кликаем по кнопке
         device.findObject(By.res(packageName, "buttonChange")).click()
-
-        val result = device.findObject(By.res(packageName, "textToBeChanged")).text
-        assertEquals(result, textToSet)
+        //получаем фактический результат
+        val resultText = device.findObject(By.res(packageName, "textToBeChanged")).text
+        assertEquals(resultText, expectedText)
     }
+
+    //Тест на открытие текста в новой Activity
+    @Test
+    fun testOpenActivity() {
+
+        val packageName = MODEL_PACKAGE
+        waitForPackage(packageName)
+
+        //вводим значение в поле
+        device.findObject(By.res(packageName, "userInput")).text = textToSet
+        //кликаем по кнопке
+        device.findObject(By.res(packageName, "buttonActivity")).click()
+        //ожидаем открытие второй страницы
+        waitForPackage(MODEL_PACKAGE)
+        //получаем фактический результат
+        val resultText = device.findObject(By.res(packageName, "text")).text
+        assertEquals(resultText, textToSet)
+    }
+
 
 }
 
